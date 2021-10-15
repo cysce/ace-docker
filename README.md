@@ -2,60 +2,35 @@
 
 <img src="./app_connect_light_256x256.png" width="100" alt="IBM ACE logo"/>
 
-Run [IBM® App Connect Enterprise](https://developer.ibm.com/integration/docs/app-connect-enterprise/faq/) in a container.
+Este GitHub es un fork de IBM® App Connect Enterprise - https://github.com/ot4i/ace-docker con fin experimental. 
 
-You can build an image containing one of the following combinations:
+Se puede construir una imagen que contenga una de las siguientes combinaciones:
 - IBM App Connect Enterprise 
 - IBM App Connect Enterprise with IBM MQ Client
-- IBM App Connect Enterprise for Developers
-- IBM App Connect Enterprise for Developers with IBM MQ Client
-
-For information of building images with IBM MQ Advanced please refer to [IBM App Connect Enterprise for Developers with IBM MQ Advanced for Developers](README-MQ.md)
-
-The IBM App Connect operator now supports a single image which includes both the ACE server runtime as well as an MQ client. This readme will describe how you can build an equivalent image.
-
-Pre-built developer and production edition image can be found on IBM Container Registry - [Obtaining the IBM App Connect Enterprise server image from the IBM Cloud Container Registry](https://www.ibm.com/support/knowledgecenter/en/SSTTDS_11.0.0/com.ibm.ace.icp.doc/certc_install_obtaininstallationimageser.html)
-
+- IBM App Connect Enterprise with IBM MQ Server
 
 ## Building a container image
 
-Download a copy of App Connect Enterprise (ie. `ace-12.0.1.0.tar.gz`) and place it in the `deps` folder. When building the image use `build-arg` to specify the name of the file: `--build-arg ACE_INSTALL=ace-12.0.1.0.tar.gz`
+Descarga una copia de App Connect Enterprise (ie. `ace-12.0.1.0.tar.gz`) y colocala en el directorio `deps`. 
 
 **Important:** Only ACE version **12.0.1.0 or greater** is supported.
 
-Choose if you want to have an image with just App Connect Enterprise or an image with both App Connect Enterprise and the IBM MQ Client libraries. The second of these is used by the IBM App Connect operator.
+Elija si desea tener una imagen solo con App Connect Enterprise o una imagen con las librerías de App Connect Enterprise y de IBM MQ Server/Client.
 
 ### Building a container image which contains an IBM Service provided fix for ACE
 
-You may have been provided with a fix for App Connect Enterprise by IBM Support, this fix will have a name of the form `12.0.X.Y-ACE-LinuxX64-TF12345.tar.gz`. This fix can be used to create a container image in one of two different ways:
+Es posible que exista un FIX del producto, el cual, se puede aplicar a la imagen de la siguiente forma:
 
 #### Installation during container image build
-This method builds a new container image derived from an existing ACE container image and applies the ifix using the standard `mqsifixinst.sh` script. The ifix image can be built from any existing ACE container image, e.g. `ace-only`, `ace-mqclient`, or another ifix image. Simply build `Dockerfile.ifix` passing in the full `BASE_IMAGE` name and the `IFIX_ID` arguments set:
+Se crea una imagen de contenedor derivada de una imagen de contenedor ACE existente y aplica el ifix usando el script estándar `mqsifixinst.sh`. La imagen ifix se puede construir a partir de cualquier imagen de contenedor ACE existente, e.g. `ace-only`, `ace-mq`. Simplemente construyeSimply build `Dockerfile.ifix` passing in the full `BASE_IMAGE` name and the `IFIX_ID` arguments set:
 
 ```bash
 docker build -t ace-server:12.0.x.y-r1-tfit12345 --build-arg BASE_IMAGE=ace-server:12.0.x.y-1 --build-arg IFIX_ID=12.0.X.Y-ACE-LinuxX64-TFIT12345 --file ubi/Dockerfile.ifix path/to/folder/containing/ifix
 ```
 
-#### Pre-applying the fix to the ACE install image
-This method applies the ifix directly to the ACE installation image that is consumed to make the full container image. **NB**: Only follow these instructions if you have been instructed by IBM Support to "manually install" the ifix, or that the above method is not applicable to your issue. If you follow these instructions then the ifix ID will _not_ appear in the output of `mqsiservice -v`.
-
-In order to apply this fix manually follow these steps.
- - On a local system extract the App Connect Enterprise archive
-   `tar -xvf ace-12.0.1.0.tar.gz`
- - Extract the fix package into expanded App Connect Enterprise installation
-   `tar -xvf /path/to/12.0.1.0-ACE-LinuxX64-TF12345.tar.gz --directory ace-12.0.1.0`
- - Tar and compress the resulting App Connect Enterprise installation
-   `tar -cvf ace-12.0.1.0_with_IT12345.tar ace-12.0.1.0`
-   `gzip ace-12.0.1.0_with_IT12345.tar`
- - Place the resulting `ace-12.0.1.0_with_IT12345.tar.gz` file in the `deps` folder and when building using the `build-arg` to specify the name of the file: `--build-arg ACE_INSTALL=ace-12.0.1.0_with_IT12345.tar.gz`
-
-### Using App Connect Enterprise for Developers
-
-Get [ACE for Developers edition](https://www.ibm.com/marketing/iwm/iwm/web/pick.do?source=swg-wmbfd). Then place it in the `deps` folder as mentioned above.
-
 ### Build an image with App Connect Enterprise only
 
-The `deps` folder must contain a copy of ACE, **version 12.0.1.0 or greater**. If using ACE for Developers, download it from [here](https://www.ibm.com/marketing/iwm/iwm/web/pick.do?source=swg-wmbfd).
+The `deps` folder must contain a copy of ACE, **version 12.0.1.0 or greater**.
 Then set the build argument `ACE_INSTALL` to the name of the ACE file placed in `deps`.
 
 1. ACE for Developers only:
